@@ -37,7 +37,7 @@
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/xor-3ncryp73r.git
+git clone https://github.com/gahmtech/xor-encrypter/xor-encrypter.git
 cd xor-3ncryp73r
 ```
 ### 2. Create a virtual enviroment and activate
@@ -53,7 +53,7 @@ pip install -r requirements.txt
 
 ### Usage
 ```bash
-python3 xor_encryptor.py <inputfile> -o <outputfile> -k <key> -f <output format>
+python3 xorenc.py <inputfile> -o <outputfile> -k <key> -f <output format>
 ```
 #### Arguments
 | Argument       | Description                                          |
@@ -96,17 +96,17 @@ Generates a C source file with a byte array suitable for embedding.
 
 ##### XOR a binary file → binary output
 ```bash
-python xor_encryptor.py shellcode.bin -o xored.bin -k secretkey
+python xorenc.py shellcode.bin -o xored.bin -k secretkey
 ```
 
 ##### XOR a hex text file → C source output
 ```bash
-python xor_encryptor.py payload.txt -o payload.c -k mykey -f c
+python xorenc.py payload.txt -o payload.c -k mykey -f c
 ```
 
 ##### Use a hex-encoded key
 ```bash
-python xor_encryptor.py input.bin -o output.bin -k hex:414243
+python xorenc.py input.bin -o output.bin -k hex:414243
 ```
 *(Key = `ABC`)*
 
@@ -114,7 +114,7 @@ python xor_encryptor.py input.bin -o output.bin -k hex:414243
 
 ##### Generate a Python payload file
 ```bash
-python xor_encryptor.py payload.bin -o payload.py -k supersecret -f python
+python xorenc.py payload.bin -o payload.py -k supersecret -f python
 ```
 Example output:
 ```bash
@@ -125,7 +125,7 @@ payload_len = 3
 
 ##### Read hex input from stdin
 ```bash
-echo "90 90 CC" | python xor_encryptor.py - -o out.bin -k testkey
+echo "90 90 CC" | python xorenc.py - -o out.bin -k testkey
 ```
 
 ---
