@@ -38,13 +38,12 @@
 
 ```bash
 git clone https://github.com/gahmtech/xor-encrypter/xor-encrypter.git
-cd xor-3ncryp73r
+cd xor-encrypter
 ```
 ### 2. Create a virtual enviroment and activate
 ```bash
 python3 -m venv venv
 source venv/bin/activate   # Linux / macOS
-venv\Scripts\activate      # Windows
 ```
 ### 3. Install dependencies
 ```bash
