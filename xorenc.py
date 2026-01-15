@@ -1,8 +1,15 @@
+"""
+XOR 3ncryp73r
+
+A command-line utility to XOR-obfuscate binary or hex-encoded input files
+and emit the result in binary, Python, or C source formats.
+
+⚠ XOR is reversible and should not be used for cryptographic security.
+"""
 import argparse
 import sys
 import pyfiglet
 from pathlib import Path
-from itertools import cycle
 
 
 ascii_logo = pyfiglet.figlet_format("XOR 3ncryp73r")
@@ -10,9 +17,20 @@ ascii_logo = pyfiglet.figlet_format("XOR 3ncryp73r")
 
 def read_input_file(path: Path) -> bytes:
     """
-    Read input file:
-      - .bin → raw bytes
-      - .txt → hex-encoded text (spaces/newlines allowed)
+    Read input data from a file.
+
+    Supported formats:
+        - .bin: Raw binary bytes
+        - .txt: Hex-encoded text (whitespace allowed)
+
+    Args:
+        path (Path): Path to the input file.
+
+    Returns:
+        bytes: Parsed input data.
+
+    Raises:
+        ValueError: If the file type is unsupported or hex decoding fails.
     """
     if path.suffix.lower() == ".bin":
         return path.read_bytes()
@@ -29,17 +47,56 @@ def read_input_file(path: Path) -> bytes:
 
 
 def xor_data(data: bytes, key: bytes) -> bytes:
+    """
+    XOR data with a repeating key.
+
+    Args:
+        data (bytes): Input data to obfuscate.
+        key (bytes): XOR key (must not be empty).
+
+    Returns:
+        bytes: XOR-obfuscated output.
+
+    Raises:
+        ValueError: If the key is empty.
+    """
     if not key:
         raise ValueError("[-] XOR key must not be empty")
+    out = []
+    key_len = len(key)
 
-    return bytes(d ^ k for d, k in zip(data, cycle(key)))
+    for i, byte in enumerate(data):
+        out.append(byte ^ key[i % key_len])
+
+    return bytes(out)
+#    return bytes(d ^ k for d, k in zip(data, cycle(key)))
 
 
 def output_bin(data: bytes, outfile: Path):
+    """
+    Write raw binary output to a file.
+
+    Args:
+        data (bytes): Obfuscated data.
+        outfile (Path): Output file path.
+    """
     outfile.write_bytes(data)
 
 
 def output_python(data: bytes, key: bytes, outfile: Path):
+    """
+    Write XOR payload as a Python source file.
+
+    The output contains:
+        - key (bytes)
+        - payload (bytes)
+        - payload length
+
+    Args:
+        data (bytes): Obfuscated payload.
+        key (bytes): XOR key used.
+        outfile (Path): Output .py file path.
+    """
     with outfile.open("w", encoding="utf-8") as f:
         f.write("# Auto-generated XOR payload\n\n")
         f.write(f"key = {repr(key)}\n")
@@ -47,8 +104,16 @@ def output_python(data: bytes, key: bytes, outfile: Path):
         f.write(f"payload_len = {len(data)}\n")
 
 
-def output_c(data: bytes, out_path: Path, wrap=16):
-    with out_path.open("w", encoding="utf-8") as f:
+def output_c(data: bytes, out_file: Path, wrap=16):
+    """
+    Write XOR payload as a C source array.
+
+    Args:
+        data (bytes): Obfuscated payload.
+        out_file (Path): Output .c file.
+        wrap (int): Number of bytes per line.
+    """
+    with out_file.open("w", encoding="utf-8") as f:
         f.write("unsigned char xored_shellcode[] = {\n    ")
 
         for i, b in enumerate(data):
@@ -64,7 +129,19 @@ def output_c(data: bytes, out_path: Path, wrap=16):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="XOR obfuscate a binary or hex file")
+    """
+    Parse command-line arguments and run the XOR obfuscation workflow.
+
+    Handles:
+        - Input parsing (file or stdin)
+        - Key decoding (ASCII or hex)
+        - XOR obfuscation
+        - Output formatting
+    """
+    parser = argparse.ArgumentParser(prog="xorenc", 
+                                     description="XOR obfuscate a binary or hex file", 
+                                     epilog="XOR is reversible and should not be used for cryptographic security."
+                                     )
     parser.add_argument("input", help="Input file (.bin or .txt hex), or '-' for stdin")
     parser.add_argument("-o", "--output", required=True, help="Output file")
     parser.add_argument("-k", "--key", required=True, help="XOR key string")
@@ -76,7 +153,6 @@ def main():
         key_bytes = bytes.fromhex(args.key[4:])
     else:
         key_bytes = args.key.encode()
-    # key_bytes = args.key.encode()
 
     # --- INPUT ---
     if args.input == "-":
@@ -85,14 +161,12 @@ def main():
             data = bytes.fromhex("".join(raw.split()))
         except ValueError:
             data = raw.encode()    
-    
-    #     data = sys.stdin.buffer.read()
     else:
-        input_path = Path(args.input)
-        if not input_path.exists():
+        input_file = Path(args.input)
+        if not input_file.exists():
             sys.exit("[-] Input file not found")
         try:
-            data = read_input_file(input_path)
+            data = read_input_file(input_file)
         except ValueError as e:
             sys.exit(f"[-] {e}")
 
