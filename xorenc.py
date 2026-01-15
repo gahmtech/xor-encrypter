@@ -49,14 +49,11 @@ def read_input_file(path: Path) -> bytes:
 def xor_data(data: bytes, key: bytes) -> bytes:
     """
     XOR data with a repeating key.
-
     Args:
         data (bytes): Input data to obfuscate.
         key (bytes): XOR key (must not be empty).
-
     Returns:
         bytes: XOR-obfuscated output.
-
     Raises:
         ValueError: If the key is empty.
     """
@@ -69,29 +66,23 @@ def xor_data(data: bytes, key: bytes) -> bytes:
         out.append(byte ^ key[i % key_len])
 
     return bytes(out)
-#    return bytes(d ^ k for d, k in zip(data, cycle(key)))
-
 
 def output_bin(data: bytes, outfile: Path):
     """
     Write raw binary output to a file.
-
     Args:
         data (bytes): Obfuscated data.
         outfile (Path): Output file path.
     """
     outfile.write_bytes(data)
 
-
 def output_python(data: bytes, key: bytes, outfile: Path):
     """
     Write XOR payload as a Python source file.
-
     The output contains:
         - key (bytes)
         - payload (bytes)
         - payload length
-
     Args:
         data (bytes): Obfuscated payload.
         key (bytes): XOR key used.
@@ -103,11 +94,9 @@ def output_python(data: bytes, key: bytes, outfile: Path):
         f.write(f"payload = {repr(data)}\n")
         f.write(f"payload_len = {len(data)}\n")
 
-
 def output_c(data: bytes, out_file: Path, wrap=16):
     """
     Write XOR payload as a C source array.
-
     Args:
         data (bytes): Obfuscated payload.
         out_file (Path): Output .c file.
@@ -120,18 +109,14 @@ def output_c(data: bytes, out_file: Path, wrap=16):
             f.write(f"0x{b:02X}")
             if i != len(data) - 1:
                 f.write(", ")
-
             if (i + 1) % wrap == 0 and i != len(data) - 1:
                 f.write("\n    ")
-
         f.write("\n};\n")
         f.write(f"unsigned int xored_shellcode_len = {len(data)};\n")
-
 
 def main():
     """
     Parse command-line arguments and run the XOR obfuscation workflow.
-
     Handles:
         - Input parsing (file or stdin)
         - Key decoding (ASCII or hex)
